@@ -58,17 +58,10 @@ app.post("/api/v1/users", readUsersFile, async (req, res, next) => {
   const users = req.users;
   const newUser = {
     id: users[users.length - 1].id + 1,
-    name: req.body?.name,
-    username: req.body?.username,
-    email: req.body?.email,
-    address: req.body?.address,
-    phone: req.body?.phone,
-    website: req.body?.website,
-    company: req.body?.company,
+    ...req.body,
   };
 
   const user = users.find((user) => user.email === newUser.email);
-  console.log(user);
 
   if (!user) {
     users.push(newUser);
@@ -80,7 +73,10 @@ app.post("/api/v1/users", readUsersFile, async (req, res, next) => {
       );
       res.status(200).json({
         status: "success",
-        data: newUser,
+        result: users.length,
+        data: {
+          user: users,
+        },
       });
     } catch (err) {
       next(err);
@@ -100,13 +96,7 @@ app.put("/api/v1/users/:id", readUsersFile, (req, res) => {
   if (user) {
     const updatedUser = {
       ...user,
-      name: req.body?.name || user.name,
-      username: req.body?.username || user.username,
-      email: req.body?.email || user.email,
-      address: req.body?.address || user.address,
-      phone: req.body?.phone || user.phone,
-      website: req.body?.website || user.website,
-      company: req.body?.company || user.company,
+      ...req.body,
     };
 
     const updatedUsers = users.map((user) =>
@@ -206,9 +196,7 @@ app.post(
     const posts = req.posts.filter((post) => String(post.userId) === userId);
     const newPost = {
       id: posts[posts.length - 1].id + 1,
-      userId: req.body?.userId,
-      title: req.body?.title,
-      body: req.body?.body,
+      ...req.body,
     };
 
     posts.push(newPost);
@@ -220,7 +208,8 @@ app.post(
       );
       res.status(200).json({
         status: "success",
-        data: newPost,
+        length: posts.length,
+        data: { posts: posts },
       });
     } catch (err) {
       next(err);
@@ -237,9 +226,7 @@ app.put("/api/v1/users/:userId/posts/:id", readPostsFile, (req, res) => {
   if (post) {
     const updatedPost = {
       ...post,
-      userId: req.body?.userId || post.userId,
-      title: req.body?.title || post.title,
-      body: req.body?.body || post.body,
+      ...req.body,
     };
 
     const updatedPosts = posts.map((post) =>
