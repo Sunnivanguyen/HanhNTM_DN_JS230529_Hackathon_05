@@ -1,0 +1,39 @@
+[
+  {
+    "id": 1,
+    "players": [
+      {
+        "idPlayer": 1,
+        "name": "Jack",
+        "rounds": [
+          { "idRound": 1, "score": -2 },
+          { "idRound": 2, "score": -8 }
+        ]
+      },
+      {
+        "idPlayer": 2,
+        "name": "Jack",
+        "rounds": [
+          { "idRound": 1, "score": -2 },
+          { "idRound": 2, "score": -8 }
+        ]
+      },
+      {
+        "idPlayer": 3,
+        "name": "Jack",
+        "rounds": [
+          { "idRound": 1, "score": -2 },
+          { "idRound": 2, "score": -8 }
+        ]
+      },
+      {
+        "idPlayer": 4,
+        "name": "Jack",
+        "rounds": [
+          { "idRound": 1, "score": -2 },
+          { "idRound": 2, "score": -8 }
+        ]
+      }
+    ]
+  }
+]
