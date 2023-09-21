@@ -195,6 +195,7 @@ app.post(
     const userId = req.params.userId;
     const posts = req.posts.filter((post) => String(post.userId) === userId);
     const newPost = {
+      userId: userId,
       id: posts[posts.length - 1].id + 1,
       ...req.body,
     };
@@ -259,7 +260,7 @@ app.delete(
 
     try {
       await fs.promises.writeFile(
-        "./dev-data/data/users.json",
+        "./dev-data/data/posts.json",
         JSON.stringify(updatedPosts)
       );
       res.status(200).json({
