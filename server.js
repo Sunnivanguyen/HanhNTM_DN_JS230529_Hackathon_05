@@ -4,6 +4,8 @@ const fs = require("fs");
 const express = require("express");
 const app = express();
 
+const userValidation = require("./middleware/userValidation");
+
 const port = process.env.PORT || 9000;
 app.use(express.json());
 const readUsersFile = async (req, res, next) => {
@@ -24,6 +26,7 @@ const readUsersFile = async (req, res, next) => {
   }
 };
 
+//Get A User
 app.get("/api/v1/users/:id", readUsersFile, (req, res) => {
   const id = req.params.id;
   const users = req.users;
@@ -43,6 +46,7 @@ app.get("/api/v1/users/:id", readUsersFile, (req, res) => {
   }
 });
 
+//Get All Users
 app.get("/api/v1/users", readUsersFile, (req, res) => {
   const users = req.users;
   res.status(200).json({
@@ -54,41 +58,37 @@ app.get("/api/v1/users", readUsersFile, (req, res) => {
   });
 });
 
-app.post("/api/v1/users", readUsersFile, async (req, res, next) => {
+//Create A User
+app.post("/api/v1/users", readUsersFile, userValidation, async (req, res) => {
   const users = req.users;
+
   const newUser = {
     id: users[users.length - 1].id + 1,
     ...req.body,
   };
+  users.push(newUser);
 
-  const user = users.find((user) => user.email === newUser.email);
-
-  if (!user) {
-    users.push(newUser);
-
-    try {
-      await fs.promises.writeFile(
-        "./dev-data/data/users.json",
-        JSON.stringify(users)
-      );
-      res.status(200).json({
-        status: "success",
-        result: users.length,
-        data: {
-          user: users,
-        },
-      });
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    res.status(409).json({
+  try {
+    await fs.promises.writeFile(
+      "./dev-data/data/users.json",
+      JSON.stringify(users)
+    );
+    return res.status(200).json({
+      status: "success",
+      result: users.length,
+      data: {
+        user: newUser,
+      },
+    });
+  } catch (error) {
+    return res.status(400).json({
       status: "fail",
-      message: "Email already existed",
+      message: error.message,
     });
   }
 });
 
+//Update A User
 app.put("/api/v1/users/:id", readUsersFile, (req, res) => {
   const id = req.params.id;
   const users = req.users;
@@ -106,7 +106,7 @@ app.put("/api/v1/users/:id", readUsersFile, (req, res) => {
       status: "success",
       results: updatedUsers.length,
       data: {
-        users: updatedUsers,
+        users: updatedUser,
       },
     });
   } else {
@@ -117,10 +117,12 @@ app.put("/api/v1/users/:id", readUsersFile, (req, res) => {
   }
 });
 
+//Delete A User
 app.delete("/api/v1/users/:id", readUsersFile, async (req, res) => {
   const id = req.params.id;
   const users = req.users;
   const updatedUsers = users.filter((user) => String(user.id) !== id);
+
   try {
     await fs.promises.writeFile(
       "./dev-data/data/users.json",
@@ -156,6 +158,19 @@ const readPostsFile = async (req, res, next) => {
   }
 };
 
+//Get All Posts
+app.get("/api/v1/posts", readPostsFile, (req, res) => {
+  const posts = req.posts;
+  res.status(200).json({
+    status: "success",
+    results: posts.length,
+    data: {
+      posts: posts,
+    },
+  });
+});
+
+//Get A Post of A User
 app.get("/api/v1/users/:userId/posts/:id", readPostsFile, (req, res) => {
   const userId = req.params.userId;
   const id = req.params.id;
@@ -176,6 +191,7 @@ app.get("/api/v1/users/:userId/posts/:id", readPostsFile, (req, res) => {
   }
 });
 
+//Get All Posts of a User
 app.get("/api/v1/users/:userId/posts", readPostsFile, (req, res) => {
   const userId = req.params.userId;
   const posts = req.posts.filter((post) => String(post.userId) === userId);
@@ -188,6 +204,7 @@ app.get("/api/v1/users/:userId/posts", readPostsFile, (req, res) => {
   });
 });
 
+//Create A Post of A User
 app.post(
   "/api/v1/users/:userId/posts",
   readPostsFile,
@@ -210,7 +227,7 @@ app.post(
       res.status(200).json({
         status: "success",
         length: posts.length,
-        data: { posts: posts },
+        data: { newPost },
       });
     } catch (err) {
       next(err);
@@ -218,6 +235,7 @@ app.post(
   }
 );
 
+//Update A Post of A User
 app.put("/api/v1/users/:userId/posts/:id", readPostsFile, (req, res) => {
   const userId = req.params.userId;
   const id = req.params.id;
@@ -249,6 +267,7 @@ app.put("/api/v1/users/:userId/posts/:id", readPostsFile, (req, res) => {
   }
 });
 
+//Delete A Post of A User
 app.delete(
   "/api/v1/users/:userId/posts/:id",
   readPostsFile,
